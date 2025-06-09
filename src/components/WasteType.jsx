@@ -2,7 +2,7 @@ import React from 'react'
 
 const WasteType = () => {
   return (
-    <h1>Choose WasteType Page</h1>
+    <h1 className='text-2xl font-bold text-center'>Choose Waste Type Page</h1>
   )
 }
 

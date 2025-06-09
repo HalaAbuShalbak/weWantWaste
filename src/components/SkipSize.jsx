@@ -105,7 +105,8 @@ const SkipSize = () => {
     const [skips, setSkips] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState(null)
-    const [sortOrder, setSortOrder] = useState('asc');
+    const [priceSort, setPriceSort] = useState('asc');
+    const [yardSort, setYardSort] = useState('asc');
     const [filterRoad, setFilterRoad] = useState(false);
     const [filterHeavy, setFilterHeavy] = useState(false);
     const [selectedSkipId, setSelectedSkipId] = useState(null);
@@ -140,10 +141,17 @@ const SkipSize = () => {
 
     // Sorting
     filteredSkips = filteredSkips.sort((a, b) => {
+        // First sort by price
         const aNet = Number(a.price_before_vat) * (1 + a.vat / 100);
         const bNet = Number(b.price_before_vat) * (1 + b.vat / 100);
-        if (sortOrder === 'asc') return aNet - bNet;
-        else return bNet - aNet;
+        const priceComparison = priceSort === 'asc' ? aNet - bNet : bNet - aNet;
+        
+        // If prices are equal, sort by yards
+        if (priceComparison === 0) {
+            return yardSort === 'asc' ? a.size - b.size : b.size - a.size;
+        }
+        
+        return priceComparison;
     });
 
     const handleSkipSelect = (skip) => {
@@ -192,6 +200,40 @@ const SkipSize = () => {
                 <p className="text-lg mt-2">Compare sizes, prices, and features. Filter and sort to get exactly what you need!</p>
             </div>
             <div className="flex flex-wrap gap-4 justify-center mb-8 p-4 dark:bg-white bg-gray-900 rounded-xl shadow-md sticky top-0 z-20">
+                {/* Price Sort Button */}
+                <button
+                    onClick={() => setPriceSort(order => order === 'asc' ? 'desc' : 'asc')}
+                    className="px-4 py-2 rounded-full border border-gray-300 bg-gray-100 text-gray-700 font-medium hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all flex items-center gap-2"
+                >
+                    Price
+                    {priceSort === 'asc' ? (
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                        </svg>
+                    ) : (
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    )}
+                </button>
+
+                {/* Yard Sort Button */}
+                <button
+                    onClick={() => setYardSort(order => order === 'asc' ? 'desc' : 'asc')}
+                    className="px-4 py-2 rounded-full border border-gray-300 bg-gray-100 text-gray-700 font-medium hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all flex items-center gap-2"
+                >
+                    Yards
+                    {yardSort === 'asc' ? (
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                        </svg>
+                    ) : (
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    )}
+                </button>
+
                 {/* Filter Pills */}
                 <button
                     className={`px-4 py-2 rounded-full border transition-all font-medium flex items-center gap-2
@@ -219,41 +261,27 @@ const SkipSize = () => {
                     </svg>
                     Allows Heavy Waste
                 </button>
-                {/* Sort Dropdown */}
-                <div className="relative">
-                    <select
-                        value={sortOrder}
-                        onChange={e => setSortOrder(e.target.value)}
-                        className="appearance-none px-4 py-2 rounded-full border border-gray-300 bg-gray-100 text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all pr-10"
+
+                {/* Clear Filters Button */}
+                {(filterRoad || filterHeavy || priceSort !== 'asc' || yardSort !== 'asc') && (
+                    <button
+                        className="ml-2 p-2 rounded-full bg-gray-200 text-gray-700 border border-gray-300 hover:bg-red-100 hover:text-red-600 transition-all relative group"
+                        onClick={() => {
+                            setFilterRoad(false);
+                            setFilterHeavy(false);
+                            setPriceSort('asc');
+                            setYardSort('asc');
+                        }}
+                        type="button"
                     >
-                        <option value="asc">Price: Low to High</option>
-                        <option value="desc">Price: High to Low</option>
-                    </select>
-                    <span className="pointer-events-none absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                    </span>  
-                    {/* Clear Filters Button */}
-                    {(filterRoad || filterHeavy || sortOrder !== 'asc') && (
-                        <button
-                            className="ml-2 p-2 rounded-full bg-gray-200 text-gray-700 border border-gray-300 hover:bg-red-100 hover:text-red-600 transition-all relative group"
-                            onClick={() => {
-                                setFilterRoad(false);
-                                setFilterHeavy(false);
-                                setSortOrder('asc');
-                            }}
-                            type="button"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                Clear Filters
-                            </span>
-                        </button>
-                    )}
-                </div> 
+                        <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            Clear Filters
+                        </span>
+                    </button>
+                )}
             </div>
             <div>
                 <Suspense fallback={<LoadingFallback />}>
