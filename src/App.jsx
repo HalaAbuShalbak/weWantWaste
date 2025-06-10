@@ -10,7 +10,6 @@ const App = () => {
     if (localStorage.getItem('theme')) {
       return localStorage.getItem('theme') === 'dark'
     }
-
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
@@ -28,7 +27,6 @@ const App = () => {
 
   const toggleDarkMode = () => {
     setIsDarkMode((prev) => !prev);
-    console.log(isDarkMode);
   };
 
   return (

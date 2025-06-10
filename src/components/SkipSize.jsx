@@ -141,17 +141,16 @@ const SkipSize = () => {
 
     // Sorting
     filteredSkips = filteredSkips.sort((a, b) => {
-        // First sort by price
-        const aNet = Number(a.price_before_vat) * (1 + a.vat / 100);
-        const bNet = Number(b.price_before_vat) * (1 + b.vat / 100);
-        const priceComparison = priceSort === 'asc' ? aNet - bNet : bNet - aNet;
-        
-        // If prices are equal, sort by yards
-        if (priceComparison === 0) {
-            return yardSort === 'asc' ? a.size - b.size : b.size - a.size;
+        // First sort by yards if yard sort is active
+        if (yardSort !== 'asc') {
+            const yardComparison = yardSort === 'desc' ? b.size - a.size : a.size - b.size;
+            if (yardComparison !== 0) return yardComparison;
         }
         
-        return priceComparison;
+        // Then sort by price
+        const aNet = Number(a.price_before_vat) * (1 + a.vat / 100);
+        const bNet = Number(b.price_before_vat) * (1 + b.vat / 100);
+        return priceSort === 'asc' ? aNet - bNet : bNet - aNet;
     });
 
     const handleSkipSelect = (skip) => {
